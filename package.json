@@ -1,0 +1,27 @@
+{
+  "name": "bully",
+  "version": "0.1.0",
+  "description": "Implementation of the Bully Algorithm to elect a master among equal peers in a distributed system",
+  "main": "index.js",
+  "dependencies": {
+    "inherits": "~2.0.0",
+    "debug": "~0.7.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "node example.js"
+  },
+  "repository": "https://github.com/jaclar/bully.git",
+  "keywords": [
+    "peer-to-peer",
+    "slave-master",
+    "distributed",
+    "election"
+  ],
+  "author": {
+      "name": "Lars Jacob",
+      "email": "lars@iamat.com",
+      "url": "https://twitter.com/jaclar"
+  },
+  "license": "MIT"
+}
