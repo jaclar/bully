@@ -6,6 +6,12 @@ process. Unresponsive/offline peers will be recognized through heartbeat timeout
 
 ## Usage
 
+Install via ```npm```:
+```bash
+npm install bully
+```
+
+Include in your project
 ```javascript
 var Bully = require('bully');
 
@@ -17,7 +23,7 @@ var opts = { id: "id", /* unique identifier of this peer */
 var bully = new Bully(opts);
 
 bully.on("master", function () {
-    console.dir('I am now the master);
+    console.dir('I am now the master');
 });
 bully.on("stepped_down", function () {
     console.dir('Unfortunately I had to step down from my responsibilities');
