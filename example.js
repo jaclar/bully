@@ -54,7 +54,7 @@ setTimeout(function () {
     bullies[9].stepDown();
     peers[9].removeAllListeners();
 
-}, 8000);
+}, 3000);
 
 // adding new peer (10)
 setTimeout(function () {
@@ -93,4 +93,16 @@ setTimeout(function () {
     bullies.push(bully);
 
 
-}, 10000);
+}, 5000);
+
+setTimeout(function () {
+    console.log("\nSend faked victory message");
+
+    bullies[3].on("error", function (err) {
+        if (err.message === "Unknown Peer") {
+            console.dir("Peer 3 ignored malicious victory claim form unknown peer " + err.id);
+        }
+    });
+    // send malicious peer victory
+    peers[3].emit("victory", {id: 99});
+}, 6000);

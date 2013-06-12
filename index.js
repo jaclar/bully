@@ -132,8 +132,11 @@ Bully.prototype._assumePower = function () {
 Bully.prototype._listenElectionInquiry = function () {
     var self = this;
     self.me.on("vote_inquiry", function (data) {
+        var peer = self.getPeer(data.id);
         debug("%s -> %s: alive", self.id, data.id);
-        self.getPeer(data.id).emit("alive", {id: self.id});
+        if (peer) {
+            peer.emit("alive", {id: self.id});
+        }
     });
 };
 
@@ -146,6 +149,12 @@ Bully.prototype.getPeer = function (id) {
             ret = peer;
         }
     });
+
+    if (!ret) {
+        var err = new Error("Unknown Peer");
+        err.id = id;
+        self.emit("error", err);
+    }
     return ret;
 };
 
@@ -157,7 +166,12 @@ Bully.prototype._listenVictory = function () {
             self._electNewMaster();
         } else {
             debug("%s: new master %s", self.id, data.id);
-            self._newMaster(self.getPeer(data.id));
+            var peer = self.getPeer(data.id);
+            if (peer) {
+                self._newMaster(peer);
+            } else {
+                self._electNewMaster();
+            }
         }
     });
 };
