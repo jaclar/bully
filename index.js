@@ -26,6 +26,8 @@ function Bully (opts) {
     self.peers = opts.peers || [];
     self.timeout = opts.timeout || 1000;
 
+    self.heartbeat = opts.heartbeat || self.timeout * 10;
+
     self.master = { failed: 0 };
 
     self.peers.forEach(function (peer) {
@@ -125,7 +127,7 @@ Bully.prototype._assumePower = function () {
             debug("%s -> %s: master ping", self.id, peer.id);
             peer.emit("ping", {id: self.id});
         });
-    }, self.timeout);
+    }, self.heartbeat);
 
 };
 
@@ -188,12 +190,12 @@ Bully.prototype._newMaster = function (peer) {
         var now = Date.now(),
             diff = now - self.master.lastSeen;
         debug("%s: check on master", self.id);
-        if (diff - 10 > self.timeout) {
+        if (diff - (self.heartbeat/10) > self.heartbeat) {
             debug("%s: master ping timeout %s: %dms", self.id, peer.id, diff);
             self._electNewMaster();
             clearInterval(self.master.interval);
         }
-    }, self.timeout);
+    }, self.heartbeat);
     debug("%s; listening to ping of master %s", self.id, self.master.peer.id);
 };
 
