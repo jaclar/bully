@@ -1,6 +1,6 @@
 {
   "name": "bully",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Implementation of the Bully Algorithm to elect a master among equal peers in a distributed system",
   "main": "index.js",
   "dependencies": {
