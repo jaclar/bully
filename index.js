@@ -58,6 +58,8 @@ function Bully (opts) {
 Bully.prototype.addPeer = function (peer) {
     var self = this;
     self.peers.push(peer);
+    debug("%s: added new peer %s", self.id, peer.id);
+    self._electNewMaster();
 };
 
 Bully.prototype.removePeer = function (id) {
@@ -99,10 +101,32 @@ Bully.prototype._electNewMaster = function () {
             self._broadcastVictory();
             self._assumePower();
         } else if (Object.keys(answers) > 0) {
-            // if the server answered but didn't assume power'
-            self._electNewMaster();
+            setTimeout(function () {
+                if (!self._didNewMasterAsumePower(answers)) {
+                    self._electNewMaster();
+                }
+            }, self.timeout);
         }
     }, self.timeout);
+};
+
+Bully.prototype._didNewMasterAsumePower = function (answers) {
+    var self = this,
+        peer,
+        master = -1,
+        ret = false;
+
+    if (!self.master.peer) {
+        return false;
+    }
+
+    for (peer in answers) {
+        if (peer > master && answers[peer]) {
+            master = peer;
+        }
+    }
+
+    return self.master.peer.id === master;
 };
 
 Bully.prototype._broadcastVictory = function () {
@@ -120,6 +144,7 @@ Bully.prototype._assumePower = function () {
         return;
     }
     self.master.self = true;
+    delete self.master.peer;
     self.emit("master");
 
     self.victoryInterval = setInterval(function () {
@@ -189,11 +214,10 @@ Bully.prototype._newMaster = function (peer) {
     self.master.interval = setInterval(function () {
         var now = Date.now(),
             diff = now - self.master.lastSeen;
-        debug("%s: check on master", self.id);
         if (diff - (self.heartbeat/10) > self.heartbeat) {
+            clearInterval(self.master.interval);
             debug("%s: master ping timeout %s: %dms", self.id, peer.id, diff);
             self._electNewMaster();
-            clearInterval(self.master.interval);
         }
     }, self.heartbeat);
     debug("%s; listening to ping of master %s", self.id, self.master.peer.id);
