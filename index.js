@@ -21,6 +21,7 @@ inherits(Bully, EventEmitter);
 function Bully (opts) {
     var self = this;
 
+    debug("%s: initializing", opts.id);
     self.id = opts.id;
     self.me = opts.me;
     self.peers = opts.peers || [];
@@ -42,10 +43,10 @@ function Bully (opts) {
     self._electNewMaster();
 
     self.me.on("ping", function (data) {
-        debug("%s: received ping from master %s", self.id, data.id);
         if (self.master.peer && data.id === self.master.peer.id) {
             self.master.lastSeen = Date.now();
         } else {
+            debug("%s: received ping from non master peer %s", self.id, data.id);
             self._electNewMaster();
         }
     });
@@ -70,6 +71,7 @@ Bully.prototype.removePeer = function (id) {
     self.peers = self.peers.filter(function (peer) {
         return peer.id !== id;
     });
+    debug("%s: removed peer %s", self.id, id);
     self._electNewMaster();
 };
 
@@ -149,7 +151,6 @@ Bully.prototype._assumePower = function () {
 
     self.victoryInterval = setInterval(function () {
         self.peers.forEach(function (peer) {
-            debug("%s -> %s: master ping", self.id, peer.id);
             peer.emit("ping", {id: self.id});
         });
     }, self.heartbeat);
@@ -189,14 +190,14 @@ Bully.prototype._listenVictory = function () {
     var self = this;
     self.me.on("victory", function (data) {
         if (data.id < self.id) {
-            debug("%s: call for new elections (%s)", self.id, data.id);
+            debug("%s: new master has to smaller id %s", self.id, data.id);
             self._electNewMaster();
         } else {
-            debug("%s: new master %s", self.id, data.id);
             var peer = self.getPeer(data.id);
             if (peer) {
                 self._newMaster(peer);
             } else {
+                debug("%s: unknown peer %s", self.id, data.id);
                 self._electNewMaster();
             }
         }
@@ -211,6 +212,7 @@ Bully.prototype._newMaster = function (peer) {
 
     self.master.lastSeen = Date.now();
     self.master.peer = peer;
+    debug("%s: new master %s", self.id, peer.id);
     self.master.interval = setInterval(function () {
         var now = Date.now(),
             diff = now - self.master.lastSeen;
