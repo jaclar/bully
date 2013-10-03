@@ -58,6 +58,17 @@ function Bully (opts) {
  */
 Bully.prototype.addPeer = function (peer) {
     var self = this;
+
+    if (self.getPeerIds().indexOf(peer.id) !== -1) {
+        self.emit("error", new Error("Duplicated peer id: " + peer.id));
+        return;
+    }
+
+    if (self.id === peer.id) {
+        self.emit("error", new Error("Can't add myself to peer list: " + peer.id));
+        return;
+    }
+
     self.peers.push(peer);
     debug("%s: added new peer %s", self.id, peer.id);
     self._electNewMaster();
@@ -184,6 +195,12 @@ Bully.prototype.getPeer = function (id) {
         self.emit("error", err);
     }
     return ret;
+};
+
+Bully.prototype.getPeerIds = function () {
+    var self = this;
+
+    return self.peers.map(function (peer) { return peer.id; });
 };
 
 Bully.prototype._listenVictory = function () {
