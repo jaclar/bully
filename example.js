@@ -51,8 +51,7 @@ identifiers.forEach(function (b) {
 // removing peer 9
 setTimeout(function () {
     console.log("\nDelete bully 9");
-    bullies[9].stepDown();
-    peers[9].removeAllListeners();
+    bullies[9].destroy();
 
 }, 3000);
 

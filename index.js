@@ -252,4 +252,12 @@ Bully.prototype.stepDown = function () {
     clearInterval(self.victoryInterval);
 };
 
+Bully.prototype.destroy = function () {
+    var self = this;
+
+    // cleaning all intervals
+    self.stepDown();
+    clearInterval(self.master.interval);
+};
+
 module.exports = Bully;
