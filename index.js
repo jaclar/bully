@@ -3,6 +3,8 @@
  * implementation of bully algorithm (https://en.Wikipedia.org/wiki/Bully_algorithm)
  */
 
+"use strict";
+
 var EventEmitter = require('events').EventEmitter,
     inherits = require('inherits'),
     debug = require('debug')('bully');
@@ -50,7 +52,6 @@ function Bully (opts) {
             self._electNewMaster();
         }
     });
-
 };
 
 /**
