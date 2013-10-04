@@ -258,6 +258,7 @@ Bully.prototype.destroy = function () {
     // cleaning all intervals
     self.stepDown();
     clearInterval(self.master.interval);
+    self.me.removeAllListeners(["ping", "vote_inquiry", "victory"]);
     self.removeAllListeners();
 };
 
