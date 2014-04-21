@@ -42,7 +42,11 @@ function Bully (opts) {
     self._listenElectionInquiry();
     self._listenVictory();
 
-    self._electNewMaster();
+    setTimeout(function() {
+        //delay master election
+        self._electNewMaster();
+    }, self.timeout);
+
 
     self.me.on("ping", function (data) {
         if (self.master.peer && data.id === self.master.peer.id) {
@@ -94,7 +98,7 @@ Bully.prototype._electNewMaster = function () {
     debug("%s: elect new master", self.id);
 
     self.me.on("alive", function (data) {
-        debug("%s -> %s: alive", data.id, self.id);
+        debug("%s -> %s: alive received", data.id, self.id);
         answers[data.id] = true;
     });
 
@@ -163,6 +167,7 @@ Bully.prototype._assumePower = function () {
 
     self.victoryInterval = setInterval(function () {
         self.peers.forEach(function (peer) {
+            debug("%s -> %s: ping", self.id, peer.id);
             peer.emit("ping", {id: self.id});
         });
     }, self.heartbeat);
@@ -173,7 +178,7 @@ Bully.prototype._listenElectionInquiry = function () {
     var self = this;
     self.me.on("vote_inquiry", function (data) {
         var peer = self.getPeer(data.id);
-        debug("%s -> %s: alive", self.id, data.id);
+        debug("%s -> %s: alive sent", self.id, data.id);
         if (peer) {
             peer.emit("alive", {id: self.id});
         }
