@@ -100,7 +100,6 @@ Bully.prototype._electNewMaster = function () {
     if (this.electionInProgress) {
         return;
     }
-
     this.electionInProgress = true;
 
     self.me.on("alive", function (data) {
@@ -117,10 +116,12 @@ Bully.prototype._electNewMaster = function () {
     });
 
     setTimeout(function () {
-        delete self.electionInProgress;
-        self.me.removeAllListeners("alive");
         var victory = Object.keys(answers).every(function (peer) { return !answers[peer]; });
         debug("%s: evaluating poll results", self.id);
+
+        delete self.electionInProgress;
+        self.me.removeAllListeners("alive");
+
         if (victory) {
             self._broadcastVictory();
             self._assumePower();
