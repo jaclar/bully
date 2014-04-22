@@ -9,7 +9,7 @@ var peers = [],
 // generating identifiers
 var i = 0;
 for (i = 0;i < 10; i+= 1) {
-    identifiers.push(i);
+    identifiers.push("0" + i);
 }
 
 // generating peers
@@ -59,17 +59,17 @@ setTimeout(function () {
 setTimeout(function () {
     console.log("\nAdd bully 10");
     var peer = new EventEmitter();
-    peer.id = 10;
+    peer.id = "10";
     peers.push(peer);
 
     var opts = {
-        id: 10,
+        id: "10",
         timeout: 500
     },
         bully;
 
     opts.peers = peers.filter(function (p) {
-        if (p.id === 10) {
+        if (p.id === "10") {
             opts.me = p;
             return false;
         } else {
@@ -83,11 +83,11 @@ setTimeout(function () {
     bully = new Bully(opts);
 
     bully.on("master", function () {
-        console.dir(10 + ": is now master");
+        console.dir("10" + ": is now master");
     });
 
     bully.on("stepped_down", function () {
-        console.dir(10 + ": stepped down");
+        console.dir("10" + ": stepped down");
     });
     bullies.push(bully);
 
@@ -104,4 +104,4 @@ setTimeout(function () {
     });
     // send malicious peer victory
     peers[3].emit("victory", {id: 99});
-}, 6000);
+}, 7000);
