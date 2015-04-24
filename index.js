@@ -29,7 +29,7 @@ function Bully (opts) {
     self.peers = opts.peers || [];
     self.timeout = opts.timeout || 1000;
 
-    self.heartbeat = opts.heartbeat || self.timeout * 10;
+    self.heartbeat = opts.heartbeat || self.timeout * 3;
 
     self.master = { failed: 0 };
 
@@ -115,6 +115,7 @@ Bully.prototype._electNewMaster = function () {
         }
     });
 
+    // waiting for results coming in
     setTimeout(function () {
         var victory = Object.keys(answers).every(function (peer) { return !answers[peer]; });
         debug("%s: evaluating poll results", self.id);
