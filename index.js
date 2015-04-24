@@ -119,7 +119,7 @@ Bully.prototype._electNewMaster = function () {
         var victory = Object.keys(answers).every(function (peer) { return !answers[peer]; });
         debug("%s: evaluating poll results", self.id);
 
-        delete self.electionInProgress;
+        self.electionInProgress = false;
         self.me.removeAllListeners("alive");
 
         if (victory) {
