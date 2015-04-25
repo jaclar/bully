@@ -27,6 +27,7 @@ function Bully (opts) {
     self.id = opts.id;
     self.me = opts.me;
     self.peers = opts.peers || [];
+    debug("%s: known peers %s", self.id, JSON.stringify(self.peers.map(function (p){return p.id})));
     self.timeout = opts.timeout || 1000;
 
     self.heartbeat = opts.heartbeat || self.timeout * 3;
@@ -44,6 +45,7 @@ function Bully (opts) {
 
     setTimeout(function() {
         //delay master election
+        debug("%s: time to elect new master", self.id);
         self._electNewMaster();
     }, self.timeout);
 
@@ -101,7 +103,6 @@ Bully.prototype._electNewMaster = function () {
         return;
     }
     this.electionInProgress = true;
-
     self.me.on("alive", function (data) {
         debug("%s -> %s: alive received", data.id, self.id);
         answers[data.id] = true;
@@ -119,6 +120,7 @@ Bully.prototype._electNewMaster = function () {
     setTimeout(function () {
         var victory = Object.keys(answers).every(function (peer) { return !answers[peer]; });
         debug("%s: evaluating poll results", self.id);
+        debug("%s: %s -> %s", self.id, JSON.stringify(answers), victory);
 
         self.electionInProgress = false;
         self.me.removeAllListeners("alive");
@@ -129,6 +131,7 @@ Bully.prototype._electNewMaster = function () {
         } else if (Object.keys(answers) > 0) {
             setTimeout(function () {
                 if (!self._didNewMasterAsumePower(answers)) {
+                    debug("%s: new master did not asumed power", self.id);
                     self._electNewMaster();
                 }
             }, self.timeout);
@@ -143,6 +146,7 @@ Bully.prototype._didNewMasterAsumePower = function (answers) {
         ret = false;
 
     if (!self.master.peer) {
+        debug("%s: no master peer", self.id);
         return false;
     }
 
@@ -171,6 +175,7 @@ Bully.prototype._assumePower = function () {
     }
     self.master.self = true;
     delete self.master.peer;
+    debug("%s: emiting master", self.id);
     self.emit("master");
 
     self.victoryInterval = setInterval(function () {
@@ -186,8 +191,8 @@ Bully.prototype._listenElectionInquiry = function () {
     var self = this;
     self.me.on("vote_inquiry", function (data) {
         var peer = self.getPeer(data.id);
-        debug("%s -> %s: alive sent", self.id, data.id);
         if (peer) {
+        debug("%s -> %s: alive sent", self.id, data.id);
             peer.emit("alive", {id: self.id});
         }
     });
@@ -221,7 +226,7 @@ Bully.prototype._listenVictory = function () {
     var self = this;
     self.me.on("victory", function (data) {
         if (data.id < self.id) {
-            debug("%s: new master has to smaller id %s", self.id, data.id);
+            debug("%s: new master has smaller id %s", self.id, data.id);
             self._electNewMaster();
         } else {
             var peer = self.getPeer(data.id);
@@ -260,6 +265,7 @@ Bully.prototype.stepDown = function () {
     var self = this;
     if (self.master.self) {
         self.master.self = false;
+        debug("%s: emiting stepped_down", self.id);
         self.emit("stepped_down");
     }
     clearInterval(self.victoryInterval);
