@@ -47,6 +47,16 @@ function Bully (opts) {
         //delay master election
         debug("%s: time to elect new master", self.id);
         self._electNewMaster();
+
+        // watch dog if there is no master set
+        self._watchdog = setInterval(function () {
+            if (self.master.peer || self.master.self || self.electionInProgress) {
+                return;
+            }
+            debug("%s: No master: %s, %s, %s", self.id, JSON.stringify(self.master.peer), self.master.self, self.electionInProgress);
+            self.emit("error", new Error("No master exists"));
+            self._electNewMaster();
+        }, self.heartbeat);
     }, self.timeout);
 
 
@@ -276,6 +286,7 @@ Bully.prototype.destroy = function () {
 
     // cleaning all intervals
     self.stepDown();
+    clearInterval(self._watchdog);
     clearInterval(self.master.interval);
     self.me.removeAllListeners(["ping", "vote_inquiry", "victory"]);
     self.removeAllListeners();
